@@ -135,17 +135,26 @@ input[type=range]:focus::-webkit-slider-thumb{border-color:var(--accent);box-sha
 .notice{padding:13px 16px;border-radius:var(--radius);font-size:12px;line-height:1.7;margin-top:14px}
 .notice-info{background:#EBEBE7;color:var(--ink-sub);border:1px solid var(--line)}
 .notice-ok{background:var(--accent-tint);color:var(--accent-dark);border:1px solid var(--accent-line)}
-.notice-err{background:#FBEFEF;color:#8A2D2D;border:1px solid #E7D0D0}
+.notice-err{background:transparent;color:#8A2D2D;border:none;
+  border-left:2.5px solid #C43D3D;border-radius:0;
+  padding:12px 4px 12px 14px;display:flex;align-items:flex-start;gap:9px}
+.notice-err svg{flex-shrink:0;margin-top:1px;color:#C43D3D}
+input.invalid{border-color:#C43D3D!important;background:#FBEFEF}
+input.invalid::placeholder{color:#C99}
+.field-err{display:flex;align-items:center;gap:5px;margin-top:6px;
+  font-size:11.5px;color:#C43D3D;
+  max-height:0;opacity:0;overflow:hidden;
+  transition:max-height .18s ease,opacity .18s ease,margin-top .18s ease}
+.field-err.show{max-height:24px;opacity:1}
+.field-err svg{flex-shrink:0}
 .notice-warn{background:#FBF6EA;color:#7F5C1C;border:1px solid #EADCC0}
 
 .form-panel{position:relative}
-input.invalid{border-color:#C43D3D!important;background:#FBEFEF}
-input.invalid::placeholder{color:#C99}
 .loading-overlay{position:absolute;inset:0;z-index:10;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;
   background:rgba(255,255,255,.95);border-radius:var(--radius)}
 .loading-overlay.show{display:flex}
-.loading-spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--accent);
+.loading-spinner{width:46px;height:46px;border:3.5px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:12.5px;color:var(--ink-sub);text-align:center;line-height:1.7}
@@ -385,7 +394,10 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     <section class="s-form">
       <div class="sec-head"><h2 class="sec-title">入稿する</h2></div>
       <div class="form-panel" id="formPanel">
-        <div class="notice notice-err" id="noticeErr" style="display:none"></div>
+        <div class="notice notice-err" id="noticeErr" style="display:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>
+          <span id="noticeErrText"></span>
+        </div>
 
         <div class="loading-overlay" id="loadingOverlay">
           <div class="loading-spinner"></div>
@@ -393,8 +405,12 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         </div>
 
         <div class="form-grid">
-          <label class="fld"><span>お名前 <em class="req">*</em></span><input type="text" id="fName" placeholder="山田 太郎" autocomplete="name"></label>
-          <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email"></label>
+          <label class="fld"><span>お名前 <em class="req">*</em></span><input type="text" id="fName" placeholder="山田 太郎" autocomplete="name">
+            <div class="field-err" id="errName"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg><span>お名前を入力してください</span></div>
+          </label>
+          <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email">
+            <div class="field-err" id="errMail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg><span>メールアドレスを入力してください</span></div>
+          </label>
           <label class="fld full"><span>備考</span><textarea id="fNote" placeholder="例）持ち手を反対側（左側）にしてほしい&#10;例）複数個ご注文の場合、続けて入稿する際の説明など"></textarea></label>
         </div>
 
@@ -844,7 +860,8 @@ function updateDensity(v){
   densityVal.textContent = (v>0?"+":v<0?"":"±") + v;
   render();
 }
-function nudge(dx,dy){ offX += dx; offY += dy; render(); }
+const NUDGE_MM = 1;  // 1クリックあたりの移動量(mm)。商品サイズに応じて調整
+function nudge(dx,dy){ offX += dx*NUDGE_MM; offY += dy*NUDGE_MM; render(); }
 
 function alignTo(mode){
   const mm = imageSizeMM();
@@ -916,20 +933,18 @@ async function submitOrder(){
   if(!img) return;
   const name = fName.value.trim(), mail = fMail.value.trim(), note = fNote.value.trim();
   if(!document.getElementById("fBought").checked){
-    noticeErr.textContent = "ご購入が完了していることをご確認のうえ、チェックを入れてください。";
+    noticeErrText.textContent = "ご購入が完了していることをご確認のうえ、チェックを入れてください。";
     noticeErr.style.display = "block"; return;
   }
   const qty = Math.min(99, Math.max(1, parseInt(document.getElementById("fQty").value,10) || 1));
   noticeErr.style.display = "none";
-  fName.classList.remove("invalid");
-  fMail.classList.remove("invalid");
+  fName.classList.remove("invalid"); errName.classList.remove("show");
+  fMail.classList.remove("invalid"); errMail.classList.remove("show");
 
   let invalidField = false;
-  if(!name){ fName.classList.add("invalid"); invalidField = true; }
-  if(!mail){ fMail.classList.add("invalid"); invalidField = true; }
+  if(!name){ fName.classList.add("invalid"); errName.classList.add("show"); invalidField = true; }
+  if(!mail){ fMail.classList.add("invalid"); errMail.classList.add("show"); invalidField = true; }
   if(invalidField){
-    noticeErr.textContent = "お名前とメールアドレスを入力してください。";
-    noticeErr.style.display = "block";
     (name ? fMail : fName).focus();
     return;
   }
@@ -970,7 +985,7 @@ async function submitOrder(){
     showDone(name, qty);
   }catch(err){
     loadingOverlay.classList.remove("show");
-    noticeErr.innerHTML =
+    noticeErrText.innerHTML =
       "送信できませんでした。通信環境をご確認のうえ、再度お試しください。<br>" +
       "繰り返し失敗する場合は「入稿データを保存する」から保存し、メールにてお送りください。";
     noticeErr.style.display = "block";
@@ -1081,8 +1096,8 @@ if(window.ResizeObserver){
 }
 
 document.getElementById("buyFirstLink").href = STORE_ITEM_URL;
-fName.addEventListener("input", ()=>fName.classList.remove("invalid"));
-fMail.addEventListener("input", ()=>fMail.classList.remove("invalid"));
+fName.addEventListener("input", ()=>{ fName.classList.remove("invalid"); errName.classList.remove("show"); });
+fMail.addEventListener("input", ()=>{ fMail.classList.remove("invalid"); errMail.classList.remove("show"); });
 syncHeaderHeight();
 lockStageHeight(true);
 syncSubmit();
