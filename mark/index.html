@@ -154,6 +154,18 @@ input[type=range]:focus::-webkit-slider-thumb{border-color:var(--accent);box-sha
 .notice-err{background:#FBEFEF;color:#8A2D2D;border:1px solid #E7D0D0}
 .notice-warn{background:#FBF6EA;color:#7F5C1C;border:1px solid #EADCC0}
 
+.form-panel{position:relative}
+input.invalid{border-color:#C43D3D!important;background:#FBEFEF}
+input.invalid::placeholder{color:#C99}
+.loading-overlay{position:absolute;inset:0;z-index:10;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  background:rgba(255,255,255,.95);border-radius:var(--radius)}
+.loading-overlay.show{display:flex}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12.5px;color:var(--ink-sub);text-align:center;line-height:1.7}
+
 .form-panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
   padding:28px;box-shadow:var(--shadow-sm)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
@@ -407,6 +419,13 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     <section class="s-form">
       <div class="sec-head"><h2 class="sec-title">入稿する</h2></div>
       <div class="form-panel" id="formPanel">
+        <div class="notice notice-err" id="noticeErr" style="display:none"></div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">データを入稿しています。<br>しばらくお待ちください。</p>
+        </div>
+
         <div class="form-grid">
           <label class="fld"><span>お名前 <em class="req">*</em></span><input type="text" id="fName" placeholder="山田 太郎" autocomplete="name"></label>
           <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email"></label>
@@ -481,7 +500,6 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <p class="done-sub">確認メールが数分たっても届かない場合は、迷惑メールフォルダをご確認ください。</p>
       </div>
 
-      <div class="notice notice-err" id="noticeErr" style="display:none"></div>
     </section>
 
     <section class="s-credit">
@@ -874,14 +892,22 @@ async function submitOrder(){
   }
   const qty = Math.min(99, Math.max(1, parseInt(document.getElementById("fQty").value,10) || 1));
   noticeErr.style.display = "none";
+  fName.classList.remove("invalid");
+  fMail.classList.remove("invalid");
 
-  if(!name || !mail){
+  let invalidField = false;
+  if(!name){ fName.classList.add("invalid"); invalidField = true; }
+  if(!mail){ fMail.classList.add("invalid"); invalidField = true; }
+  if(invalidField){
     noticeErr.textContent = "お名前とメールアドレスを入力してください。";
-    noticeErr.style.display = "block"; return;
+    noticeErr.style.display = "block";
+    (name ? fMail : fName).focus();
+    return;
   }
 
   submitBtn.disabled = true;
   submitBtn.textContent = "送信中...";
+  loadingOverlay.classList.add("show");
 
   const mmF = imageSizeMM("front"), mmB = imageSizeMM("back");
   const payload = {
@@ -914,8 +940,10 @@ async function submitOrder(){
     totalQty += qty;
     const key = payload.plate;
     tally[key] = (tally[key] || 0) + qty;
+    loadingOverlay.classList.remove("show");
     showDone(name, qty);
   }catch(err){
+    loadingOverlay.classList.remove("show");
     noticeErr.innerHTML =
       "送信できませんでした。通信環境をご確認のうえ、再度お試しください。<br>" +
       "繰り返し失敗する場合は「入稿データを保存する」から保存し、メールにてお送りください。";
@@ -1032,6 +1060,8 @@ if(window.ResizeObserver){
 }
 
 document.getElementById("buyFirstLink").href = STORE_ITEM_URL;
+fName.addEventListener("input", ()=>fName.classList.remove("invalid"));
+fMail.addEventListener("input", ()=>fMail.classList.remove("invalid"));
 syncHeaderHeight();
 lockStageHeight(true);
 syncSubmit();
