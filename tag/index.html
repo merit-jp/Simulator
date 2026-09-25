@@ -518,10 +518,6 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           このデータを作成する
         </button>
-        <button class="btn btn-secondary" id="saveBtn" onclick="downloadPNG()" disabled>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          データを保存する
-        </button>
         <p class="form-foot">
           ※ ここでデータを作成したあと、商品ページからご購入ください。お名前とメールアドレスでご注文と照合します。
           ※ 1点ずつデザインを変えたい場合は、データ作成後に表示される「続けて別のデータを作成する」からお送りください。
@@ -1067,7 +1063,6 @@ function loadImage(e){
       fileName.style.display = "block";
       uploadArea.classList.add("has-file");
       noticeInfo.style.display = "none";
-      saveBtn.disabled = false;
       syncSubmit();
       render();
     };
@@ -1147,15 +1142,6 @@ function exportCanvas(){
   return ex;
 }
 
-function downloadPNG(){
-  if(!img) return;
-  const g = geom();
-  const a = document.createElement("a");
-  a.download = "daiyasu_"+plateKey+"_"+g.w+"x"+g.h+"mm.png";
-  a.href = exportCanvas().toDataURL("image/png");
-  a.click();
-}
-
 async function submitOrder(){
   if(!img) return;
   const name = fName.value.trim(), mail = fMail.value.trim(), note = fNote.value.trim();
@@ -1218,7 +1204,7 @@ async function submitOrder(){
     loadingOverlay.classList.remove("show");
     noticeErrText.innerHTML =
       "送信できませんでした。通信環境をご確認のうえ、再度お試しください。<br>" +
-      "繰り返し失敗する場合は「データを保存する」から保存し、メールにてお送りください。";
+      "繰り返し失敗する場合は、お手数ですが下記の大安工業までお電話またはメールでご連絡ください。";
     noticeErr.style.display = "block";
     submitBtn.disabled = false;
     submitBtn.textContent = "このデータを作成する";
@@ -1271,7 +1257,6 @@ function nextItem(){
   qtyTotal.innerHTML = "ここまでに作成したデータ　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
     "<span style=\"font-size:11.5px;font-weight:400\">" + tallyText() + "</span>";
   noticeInfo.style.display = "";
-  saveBtn.disabled = true;
   submitBtn.innerHTML =
     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
     (itemNo + 1) + "点目のデータを作成する";
