@@ -1217,8 +1217,7 @@ function showDone(name, qty){
 
   const nth = itemNo > 1 ? "（" + itemNo + "点目）" : "";
   doneLead.innerHTML =
-    name + " 様のデザイン" + nth + "のデータを " + qty + "枚 分お預かりしました。<br>" +
-    "まだご購入がお済みでない場合は、下のボタンから商品ページへ進んでご購入ください。";
+    name + " 様のデザイン" + nth + "のデータを " + qty + "枚 分お預かりしました。";
 
   doneTotal.style.display = itemNo > 1 ? "block" : "none";
   if(itemNo > 1){
@@ -1228,10 +1227,11 @@ function showDone(name, qty){
       "<span style=\"font-size:11px;font-weight:400;opacity:.85\">ご購入予定の枚数と一致しているかご確認ください。</span>";
   }
 
-  doneBoxTitle.textContent = "このあとの流れ";
+  doneBoxTitle.textContent = "この後は";
   doneBoxText.innerHTML =
-    "① 商品ページからご購入ください（ご購入済みの場合は不要です）<br>" +
-    "② ご購入内容とデータを照合し、7営業日以内に発送いたします。<br>" +
+    "・他にも作成したいデザインがある方は、下の「続けて別のデータを作成する」へ<br>" +
+    "・これで最後の方は、下の「商品ページへ進む」から購入手続きにお進みください<br><br>" +
+    "ご購入内容とデータを照合のうえ、7営業日以内に発送いたします。<br>" +
     "仕上がりについてご相談が必要な場合のみ、こちらからご連絡いたします。";
 
   doneCta.textContent = "商品ページへ進む";
