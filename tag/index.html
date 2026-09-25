@@ -171,7 +171,7 @@ input.invalid::placeholder{color:#C99}
 .field-err svg{flex-shrink:0}
 .notice-warn{background:#FBF6EA;color:#7F5C1C;border:1px solid #EADCC0}
 
-/* --- 入稿 --- */
+/* --- データ作成 --- */
 .form-panel{position:relative}
 .loading-overlay{position:absolute;inset:0;z-index:10;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;
@@ -230,22 +230,8 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 .orient-lbl{font-size:10px;letter-spacing:.16em;color:var(--ink-mute);font-weight:700;
   margin-top:18px;display:block}
 
-/* 購入確認 */
-.confirm{display:flex;align-items:flex-start;gap:11px;padding:15px 16px;margin-bottom:16px;
-  cursor:pointer;border:1px solid var(--line-strong);border-radius:var(--radius);
-  background:var(--panel);transition:border-color .16s,background-color .16s}
-.confirm:hover{border-color:var(--ink-sub)}
-.confirm:has(input:checked){border-color:var(--accent);background:var(--accent-tint)}
-.confirm input{appearance:none;-webkit-appearance:none;width:19px;height:19px;flex-shrink:0;margin:1px 0 0;
-  border:1.5px solid var(--line-strong);border-radius:3px;background:var(--panel);
-  position:relative;cursor:pointer;transition:all .16s}
-.confirm input:checked{background:var(--accent);border-color:var(--accent)}
-.confirm input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
-  border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(43deg)}
-.confirm-text{display:flex;flex-direction:column;gap:4px}
-.confirm-text strong{font-size:12.5px;font-weight:700}
-.confirm-sub{font-size:11px;color:var(--ink-sub);line-height:1.65}
-.confirm-sub a{color:var(--accent-dark);font-weight:500}
+/* この端末での作成状況の再開通知 */
+.notice-info a{color:var(--accent-dark);font-weight:500;white-space:nowrap}
 
 /* 完了画面 */
 .done{border:1px solid var(--accent-line);border-radius:var(--radius);background:var(--panel);
@@ -438,7 +424,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 
   </div>
 
-  <!-- ========== 右：結果・入稿 ========== -->
+  <!-- ========== 右：結果・データ作成 ========== -->
   <div class="col col-right scroll">
 
     <section class="s-preview">
@@ -477,8 +463,13 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     </section>
 
     <section class="s-form">
-      <div class="sec-head"><h2 class="sec-title">入稿する</h2></div>
+      <div class="sec-head"><span class="sec-num">STEP 06</span><h2 class="sec-title">データを作成する</h2></div>
       <div class="form-panel" id="formPanel">
+        <div class="notice notice-info" id="resumeNotice" style="display:none">
+          <span id="resumeNoticeText"></span>
+          　<a href="#" id="resumeResetLink" onclick="resetOrderState();return false;">別の注文として新しく作成する</a>
+        </div>
+
         <div class="notice notice-err" id="noticeErr" style="display:none">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>
           <span id="noticeErrText"></span>
@@ -486,7 +477,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 
         <div class="loading-overlay" id="loadingOverlay">
           <div class="loading-spinner"></div>
-          <p class="loading-text">データを入稿しています。<br>しばらくお待ちください。</p>
+          <p class="loading-text">データを作成しています。<br>しばらくお待ちください。</p>
         </div>
 
         <div class="form-grid">
@@ -496,7 +487,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email">
             <div class="field-err" id="errMail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg><span>メールアドレスを入力してください</span></div>
           </label>
-          <label class="fld full"><span>備考</span><textarea id="fNote" rows="4" placeholder="例）5枚中2枚がこのデザインです&#10;例）残りは別のデザインを続けて入稿します&#10;例）STORESでは別名義で購入しています（○○名義）"></textarea></label>
+          <label class="fld full"><span>備考</span><textarea id="fNote" rows="4" placeholder="例）5枚中2枚がこのデザインです&#10;例）残りは別のデザインを続けて作成します&#10;例）購入時は別名義になる予定です（○○名義）"></textarea></label>
         </div>
 
         <label class="fld full">
@@ -514,34 +505,27 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <p class="qty-note">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>
             <span>
-              <strong>ご注文枚数と入稿の合計枚数を一致させてください。</strong>
+              <strong>ご購入時の枚数と、ここで作成するデータの合計枚数を一致させてください。</strong>
               <span class="pc-only"><br>この欄は「同じデザインで作る枚数」です。<br>
-              例）円形3枚のご注文で、2種類のデザインにしたい場合<br>
-              → 2枚で入稿 →「続けて入稿する」→ 1枚で入稿（合計3枚）</span>
+              例）円形タグを3枚ご希望で、2種類のデザインにしたい場合<br>
+              → 2枚分のデータを作成 →「続けて別のデータを作成する」→ 1枚分のデータを作成（合計3枚分）</span>
             </span>
           </p>
           <p class="qty-total" id="qtyTotal" style="display:none"></p>
         </label>
 
-        <label class="confirm" id="confirmBox">
-          <input type="checkbox" id="fBought" onchange="syncSubmit()">
-          <span class="confirm-text">
-            <strong>ショップでのご購入が完了しています</strong>
-            <span class="confirm-sub">まだの方は <a href="#" id="buyFirstLink" target="_blank" rel="noopener">こちらから商品ページへ</a>。ご購入後に入稿してください。</span>
-          </span>
-        </label>
         <button class="btn btn-primary" id="submitBtn" onclick="submitOrder()" disabled>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          この内容で入稿する
+          このデータを作成する
         </button>
         <button class="btn btn-secondary" id="saveBtn" onclick="downloadPNG()" disabled>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          入稿データを保存する
+          データを保存する
         </button>
         <p class="form-foot">
-          ※ ショップでのご購入後に入稿してください。お名前とメールアドレスでご注文と照合します。
-          ※ 1点ずつデザインを変えたい場合は、入稿後に表示される「続けて入稿する」からお送りください。
-          ※ 入稿内容に誤りがあった場合は、お送りする確認メールにご返信ください。修正を承ります。
+          ※ ここでデータを作成したあと、商品ページからご購入ください。お名前とメールアドレスでご注文と照合します。
+          ※ 1点ずつデザインを変えたい場合は、データ作成後に表示される「続けて別のデータを作成する」からお送りください。
+          ※ データの内容に誤りがあった場合は、お送りする確認メールにご返信ください。ご購入前・発送前であれば修正を承ります。
         </p>
       </div>
       <!-- 送信完了画面 -->
@@ -549,7 +533,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <div class="done-mark">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"/></svg>
         </div>
-        <h3 class="done-title">入稿を受け付けました</h3>
+        <h3 class="done-title">データを作成しました</h3>
         <p class="done-lead" id="doneLead"></p>
 
         <div class="done-box">
@@ -560,7 +544,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <p class="qty-total" id="doneTotal" style="display:none;text-align:left;margin-bottom:20px"></p>
 
         <a class="btn btn-primary" id="doneCta" href="#" target="_blank" rel="noopener"></a>
-        <button class="btn btn-secondary" onclick="nextItem()">同じご注文で続けて入稿する</button>
+        <button class="btn btn-secondary" onclick="nextItem()">続けて別のデータを作成する</button>
 
         <p class="done-sub">確認メールが数分たっても届かない場合は、迷惑メールフォルダをご確認ください。</p>
       </div>
@@ -583,9 +567,15 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
    ================================================================ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbw13foXsYbVmYvM1Txp_fjRiyYB37D7qg5pRKxF9LPWkaDF202e4tgVhrhOdr09mgDBOw/exec";
 
-// STORES の商品ページ URL（入稿後の誘導先）
-const STORE_ITEM_URL = "https://dyk.stores.jp/items/6a8d56ef5c2c07b8138cb857";  // 商品ページ
-const STORE_HOME_URL = "https://dyk.stores.jp/";                                // ショップTOP
+// STORES の商品ページ URL（プレートごとに商品が分かれているため個別に設定）
+// データ作成後、「商品ページへ進む」ボタンでここに飛ばす
+const STORE_URLS = {
+  circle:  "https://dyk.stores.jp/items/6a9923582e1f47139ea95c0a",  // 円形タグ
+  dogtag:  "https://dyk.stores.jp/items/6a99224a2351e4120e6c8df8",  // ドッグタグ
+  diamond: "https://dyk.stores.jp/items/6a9923e10d04b9100cc6946b",  // ひし形タグ
+  bar:     "https://dyk.stores.jp/items/6a992450f7b4a21c4540c9f7"   // 細長タグ
+};
+const STORE_HOME_URL = "https://dyk.stores.jp/";  // ショップTOP（フォールバック用）
 
 const HOLE_D      = 4;
 const HOLE_MARGIN = 3;
@@ -649,15 +639,47 @@ const ART_H = MAX_DIM + ART_MARGIN*2;
 
 let plateKey = "circle";
 let orient = "v";          // v = 縦（穴は上） / h = 横（穴は左）
-let itemNo = 0;            // このご注文での入稿点数
-let totalQty = 0;          // このご注文での合計枚数
-const tally = {};          // プレート別の枚数（表示名 → 枚数）
 
-/* ページを開くたびに発行する識別子。
-   ドライブのフォルダをまとめる単位はこの値。
-   同姓同名の別人や、後日の再注文が混ざらない。 */
-const sessionId = Math.random().toString(36).slice(2, 8) +
-                  Date.now().toString(36).slice(-4);
+/* ここまでに作成したデータの記録をブラウザに保存しておく。
+   「2枚分だけ先に作って、後日また5枚分作って合計7枚にしたい」
+   というときも、同じ端末・同じブラウザで開けば自動で合算される。
+   別の端末・別のブラウザ、ブラウザのデータを消した場合は
+   別の注文として扱われる（この方法の限界。README参照）。 */
+const ORDER_STORAGE_KEY = "daiyasuTagOrder_v1";
+
+function loadOrderState(){
+  try{
+    const raw = localStorage.getItem(ORDER_STORAGE_KEY);
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    return (s && s.sessionId) ? s : null;
+  }catch(e){ return null; }
+}
+function saveOrderState(){
+  try{
+    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify({
+      sessionId, itemNo, totalQty, tally,
+      name: fName.value.trim(), mail: fMail.value.trim(),
+      updatedAt: Date.now()
+    }));
+  }catch(e){ /* localStorageが使えない環境では保存をあきらめるだけ */ }
+}
+function resetOrderState(){
+  try{ localStorage.removeItem(ORDER_STORAGE_KEY); }catch(e){}
+  location.reload();
+}
+
+const savedOrder = loadOrderState();
+let itemNo = savedOrder ? (savedOrder.itemNo || 0) : 0;       // ここまでの入稿点数
+let totalQty = savedOrder ? (savedOrder.totalQty || 0) : 0;   // ここまでの合計枚数
+const tally = (savedOrder && savedOrder.tally) ? savedOrder.tally : {}; // プレート別の枚数
+
+/* まとめる単位はこの値。同じ端末・同じブラウザなら
+   localStorageから引き継がれ、日をまたいでも同じフォルダに集約される。
+   新規に開いたとき、または保存されていないときだけ新しく発行する。 */
+const sessionId = (savedOrder && savedOrder.sessionId) ||
+  (Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4));
+
 let img = null;
 let scalePct = 70;
 let density = 0;
@@ -1068,9 +1090,9 @@ function tallyText(){
   return Object.keys(tally).map(k => k + " " + tally[k] + "枚").join(" / ");
 }
 
-/* 購入確認にチェックが入るまで入稿できないようにする */
+/* 画像がアップロードされるまでデータ作成ボタンを押せないようにする */
 function syncSubmit(){
-  submitBtn.disabled = !(img && document.getElementById("fBought").checked);
+  submitBtn.disabled = !img;
 }
 
 function stepQty(d){
@@ -1137,10 +1159,6 @@ function downloadPNG(){
 async function submitOrder(){
   if(!img) return;
   const name = fName.value.trim(), mail = fMail.value.trim(), note = fNote.value.trim();
-  if(!document.getElementById("fBought").checked){
-    noticeErrText.textContent = "ご購入が完了していることをご確認のうえ、チェックを入れてください。";
-    noticeErr.style.display = "block"; return;
-  }
   const qty = Math.min(99, Math.max(1, parseInt(document.getElementById("fQty").value,10) || 1));
   noticeErr.style.display = "none";
   fName.classList.remove("invalid"); errName.classList.remove("show");
@@ -1161,7 +1179,10 @@ async function submitOrder(){
   const mm = imageSizeMM();
   const payload = {
     name, mail, note,
-    purchase: "購入済み",
+    // このシミュレーターでは「データ作成が先、購入は後」の順番のため、
+    // この時点では購入済みかどうかは分からない。大安工業側でSTORESの
+    // 注文一覧と照合してもらうための注意書きとして送る。
+    purchase: "未確認（データ作成のみ・要照合）",
     qty: qty,
     sessionId: sessionId,
     plate: PLATES[plateKey].name + (PLATES[plateKey].rotatable ? "（" + (orient==="v"?"縦":"横") + "）" : ""),
@@ -1173,6 +1194,7 @@ async function submitOrder(){
     density: (density>0?"+":"")+density,
     engraveSize: mm.w.toFixed(1)+"x"+mm.h.toFixed(1)+"mm",
     offset: offX.toFixed(1)+"/"+offY.toFixed(1)+"mm",
+    storeUrl: STORE_URLS[plateKey] || STORE_HOME_URL,  // お客様への確認メールに載せる商品ページURL
     image: exportCanvas().toDataURL("image/png")
   };
 
@@ -1189,16 +1211,17 @@ async function submitOrder(){
     totalQty += qty;
     const key = payload.plate;
     tally[key] = (tally[key] || 0) + qty;
+    saveOrderState();
     loadingOverlay.classList.remove("show");
     showDone(name, qty);
   }catch(err){
     loadingOverlay.classList.remove("show");
     noticeErrText.innerHTML =
       "送信できませんでした。通信環境をご確認のうえ、再度お試しください。<br>" +
-      "繰り返し失敗する場合は「入稿データを保存する」から保存し、メールにてお送りください。";
+      "繰り返し失敗する場合は「データを保存する」から保存し、メールにてお送りください。";
     noticeErr.style.display = "block";
     submitBtn.disabled = false;
-    submitBtn.textContent = "この内容で入稿する";
+    submitBtn.textContent = "このデータを作成する";
   }
 }
 
@@ -1208,29 +1231,30 @@ function showDone(name, qty){
 
   const nth = itemNo > 1 ? "（" + itemNo + "点目）" : "";
   doneLead.innerHTML =
-    name + " 様のデザイン" + nth + "を " + qty + "枚 分お預かりしました。<br>" +
-    "ご注文と照合のうえ、3営業日以内に発送いたします。";
+    name + " 様のデザイン" + nth + "のデータを " + qty + "枚 分お預かりしました。<br>" +
+    "まだご購入がお済みでない場合は、下のボタンから商品ページへ進んでご購入ください。";
 
   doneTotal.style.display = itemNo > 1 ? "block" : "none";
   if(itemNo > 1){
     doneTotal.innerHTML =
-      "このご注文での入稿合計　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
+      "これまでに作成したデータの合計　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
       "<span style=\"font-size:11.5px;font-weight:400\">" + tallyText() + "</span><br>" +
-      "<span style=\"font-size:11px;font-weight:400;opacity:.85\">ご注文の内訳と一致しているかご確認ください。</span>";
+      "<span style=\"font-size:11px;font-weight:400;opacity:.85\">ご購入予定の枚数と一致しているかご確認ください。</span>";
   }
 
   doneBoxTitle.textContent = "このあとの流れ";
   doneBoxText.innerHTML =
-    "入稿内容を確認し、順次製作いたします。<br>" +
+    "① 商品ページからご購入ください（ご購入済みの場合は不要です）<br>" +
+    "② ご購入内容とデータを照合し、7営業日以内に発送いたします。<br>" +
     "仕上がりについてご相談が必要な場合のみ、こちらからご連絡いたします。";
 
-  doneCta.textContent = "ショップを見る";
-  doneCta.href = STORE_HOME_URL;
+  doneCta.textContent = "商品ページへ進む";
+  doneCta.href = STORE_URLS[plateKey] || STORE_HOME_URL;
   doneCta.style.display = "flex";
   donePanel.scrollIntoView({behavior:"smooth", block:"center"});
 }
 
-/* 同じ注文で続けて入稿する（お名前・メールは残す） */
+/* 同じ注文で続けて別のデータを作成する（お名前・メールは残す） */
 function nextItem(){
   donePanel.style.display = "none";
   formPanel.style.display = "block";
@@ -1244,13 +1268,13 @@ function nextItem(){
   document.getElementById("fQty").value = 1;
   syncSubmit();
   qtyTotal.style.display = "block";
-  qtyTotal.innerHTML = "ここまでの入稿　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
+  qtyTotal.innerHTML = "ここまでに作成したデータ　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
     "<span style=\"font-size:11.5px;font-weight:400\">" + tallyText() + "</span>";
   noticeInfo.style.display = "";
   saveBtn.disabled = true;
   submitBtn.innerHTML =
     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
-    (itemNo + 1) + "点目を入稿する";
+    (itemNo + 1) + "点目のデータを作成する";
 
   scalePct = 70; density = 0; offX = 0; offY = 0;
   sizeSlider.value = 70;   sizeVal.textContent = "70%";
@@ -1310,9 +1334,29 @@ if(window.ResizeObserver){
   }).observe(canvas.parentElement);
 }
 
-document.getElementById("buyFirstLink").href = STORE_ITEM_URL;
 fName.addEventListener("input", ()=>{ fName.classList.remove("invalid"); errName.classList.remove("show"); });
 fMail.addEventListener("input", ()=>{ fMail.classList.remove("invalid"); errMail.classList.remove("show"); });
+
+/* 同じ端末でのご注文状況を復元する。
+   localStorageに前回の続きがあれば、お名前・メールと
+   これまでの作成状況を画面に出し、別注文として始め直すリンクも出す。 */
+if(savedOrder){
+  if(savedOrder.name) fName.value = savedOrder.name;
+  if(savedOrder.mail) fMail.value = savedOrder.mail;
+  if(itemNo > 0){
+    resumeNotice.style.display = "block";
+    resumeNoticeText.textContent =
+      "この端末でこれまでに作成したデータ：合計" + totalQty + "枚（" + itemNo + "点） " + tallyText() +
+      "。続けて作成すると自動で合算されます。";
+    qtyTotal.style.display = "block";
+    qtyTotal.innerHTML = "ここまでに作成したデータ　<strong>" + totalQty + "枚</strong>（" + itemNo + "点）<br>" +
+      "<span style=\"font-size:11.5px;font-weight:400\">" + tallyText() + "</span>";
+    submitBtn.innerHTML =
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+      (itemNo + 1) + "点目のデータを作成する";
+  }
+}
+
 syncHeaderHeight();
 lockStageHeight(true);
 syncSubmit();
