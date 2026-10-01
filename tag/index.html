@@ -437,7 +437,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 
         <!-- 注釈（枠内・左下） -->
         <p class="ov-note" id="legendData">黒は深く彫り、グレーは浅く、白は彫りません。</p>
-        <p class="ov-note" id="legendFinish" style="display:none">鏡面ステンレスに彫刻したイメージです。</p>
+        <p class="ov-note" id="legendFinish" style="display:none">ヘアライン仕上げステンレスに彫刻したイメージです。</p>
       </div>
     </section>
 
@@ -785,7 +785,7 @@ function platePath(c, cx, cy, ppm){
   }
 }
 
-/* ---------------- ステンレス風テクスチャ ---------------- */
+/* ---------------- ヘアライン仕上げステンレス風テクスチャ ---------------- */
 let steelCache = null;
 function steelTexture(cw, ch){
   if(steelCache && steelCache.w === cw && steelCache.h === ch) return steelCache.cv;
@@ -793,49 +793,49 @@ function steelTexture(cw, ch){
   cv.width = cw; cv.height = ch;
   const x = cv.getContext("2d");
 
-  /* --- 1. 環境の映り込み ---
-     鏡面ステンレスは周囲を映す。上＝天井の明かり、中央やや下＝
-     暗い水平線（撮影者・室内）、下＝机からの照り返し、という構成。
-     ステンレスは青味を帯びて映るのでわずかに寒色へ寄せている。 */
-  const env = x.createLinearGradient(cw*0.18, 0, cw*0.34, ch);
-  env.addColorStop(0.00, "#dfe4e8");
-  env.addColorStop(0.07, "#f2f5f7");
-  env.addColorStop(0.15, "#fafcfd");
-  env.addColorStop(0.24, "#dbe0e5");
-  env.addColorStop(0.34, "#b3bac1");
-  env.addColorStop(0.44, "#949ba3");
-  env.addColorStop(0.51, "#848b93");
-  env.addColorStop(0.57, "#9ba2a9");
-  env.addColorStop(0.66, "#c3c9cf");
-  env.addColorStop(0.76, "#e2e6ea");
-  env.addColorStop(0.86, "#f4f6f8");
-  env.addColorStop(0.94, "#d2d7dc");
-  env.addColorStop(1.00, "#b0b6bc");
-  x.fillStyle = env; x.fillRect(0, 0, cw, ch);
+  /* --- 1. ベースの地色 ---
+     ヘアラインは鏡面と違って周囲をくっきり映し込まず、全体に
+     均一な乱反射をする。緩やかな縦方向の明暗だけを敷いておく。 */
+  const base = x.createLinearGradient(0, 0, 0, ch);
+  base.addColorStop(0.00, "#dcdfe2");
+  base.addColorStop(0.20, "#d0d3d6");
+  base.addColorStop(0.48, "#bcc0c3");
+  base.addColorStop(0.75, "#cdd0d3");
+  base.addColorStop(1.00, "#c0c3c6");
+  x.fillStyle = base; x.fillRect(0, 0, cw, ch);
 
-  /* --- 2. 光源のスペキュラ（対角にゆるく走る帯） --- */
+  /* --- 2. 光源のスペキュラ（ヘアラインでも淡く対角に出る帯） --- */
   const sp = x.createLinearGradient(0, ch*0.92, cw, ch*0.06);
   sp.addColorStop(0.00, "rgba(255,255,255,0)");
-  sp.addColorStop(0.30, "rgba(255,255,255,0)");
-  sp.addColorStop(0.40, "rgba(255,255,255,.14)");
-  sp.addColorStop(0.47, "rgba(255,255,255,.34)");
-  sp.addColorStop(0.54, "rgba(255,255,255,.12)");
-  sp.addColorStop(0.66, "rgba(255,255,255,0)");
+  sp.addColorStop(0.32, "rgba(255,255,255,0)");
+  sp.addColorStop(0.44, "rgba(255,255,255,.14)");
+  sp.addColorStop(0.50, "rgba(255,255,255,.22)");
+  sp.addColorStop(0.58, "rgba(255,255,255,.11)");
+  sp.addColorStop(0.70, "rgba(255,255,255,0)");
   x.fillStyle = sp; x.fillRect(0, 0, cw, ch);
 
-  /* --- 3. 左上の光だまり --- */
-  const gl = x.createRadialGradient(cw*0.24, ch*0.14, 0, cw*0.24, ch*0.14, Math.max(cw,ch)*0.7);
-  gl.addColorStop(0.00, "rgba(255,255,255,.30)");
-  gl.addColorStop(0.45, "rgba(255,255,255,.07)");
-  gl.addColorStop(1.00, "rgba(255,255,255,0)");
-  x.fillStyle = gl; x.fillRect(0, 0, cw, ch);
+  /* --- 3. ヘアラインの筋 ---
+     一定方向（横）に細い筋を1本ずつ、明暗をランダムに振って描く。
+     これが鏡面との一番の違い＝直線的な研磨目。明側に少し重みを
+     寄せて、全体の明るさが出るようにしている。 */
+  for(let yy = 0; yy < ch; yy++){
+    const v = (Math.random() - 0.35) * 0.17;
+    x.fillStyle = v >= 0 ? `rgba(255,255,255,${v.toFixed(3)})` : `rgba(18,20,22,${(-v).toFixed(3)})`;
+    x.fillRect(0, yy, cw, 1);
+  }
+  // 筋の密度を少し間引いて強調する細い明線を追加
+  for(let yy = 0; yy < ch; yy += 3){
+    if(Math.random() < 0.5) continue;
+    x.fillStyle = `rgba(255,255,255,${(0.08 + Math.random()*0.07).toFixed(3)})`;
+    x.fillRect(0, yy, cw, 1);
+  }
 
   /* --- 4. 周辺減光 --- */
   const vg = x.createRadialGradient(cw*0.5, ch*0.45, Math.min(cw,ch)*0.22,
                                     cw*0.5, ch*0.5,  Math.max(cw,ch)*0.78);
   vg.addColorStop(0.00, "rgba(16,20,24,0)");
-  vg.addColorStop(0.72, "rgba(16,20,24,.06)");
-  vg.addColorStop(1.00, "rgba(16,20,24,.24)");
+  vg.addColorStop(0.72, "rgba(16,20,24,.03)");
+  vg.addColorStop(1.00, "rgba(16,20,24,.14)");
   x.fillStyle = vg; x.fillRect(0, 0, cw, ch);
 
   /* --- 5. 微細なノイズ ---
@@ -843,10 +843,10 @@ function steelTexture(cw, ch){
      金属らしい粒状感を出す。 */
   const d = x.getImageData(0, 0, cw, ch), px = d.data;
   for(let i = 0; i < px.length; i += 4){
-    const n = (Math.random() - 0.5) * 7;
+    const n = (Math.random() - 0.5) * 6;
     px[i]   = Math.max(0, Math.min(255, px[i]   + n));
     px[i+1] = Math.max(0, Math.min(255, px[i+1] + n));
-    px[i+2] = Math.max(0, Math.min(255, px[i+2] + n * 1.1));
+    px[i+2] = Math.max(0, Math.min(255, px[i+2] + n * 1.05));
   }
   x.putImageData(d, 0, 0);
 
@@ -890,7 +890,7 @@ function markLayer(ppm, cw, ch, cx, cy, mode){
       px[i] = px[i+1] = px[i+2] = g;
     }else{
       const dark = 255 - g;                         // 黒いほど深く彫れている
-      px[i]   = 255; px[i+1] = 255; px[i+2] = 255;
+      px[i]   = 0; px[i+1] = 0; px[i+2] = 0;
       px[i+3] = Math.round(a * (dark/255) * 0.94);
     }
   }
