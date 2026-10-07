@@ -263,6 +263,27 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
   .pad button{aspect-ratio:auto;padding:14px 0}
   .credit{margin-top:0}
 }
+
+/* 入稿データ利用規約 */
+.terms-note{font-size:11.5px;color:var(--ink-sub);margin-top:10px;line-height:1.7}
+.terms-note b{display:block;font-weight:500;color:var(--ink);margin-bottom:2px}
+.terms-link{color:var(--accent-dark);text-decoration:underline;text-underline-offset:2px;cursor:pointer;background:none;border:0;font:inherit;padding:0}
+.terms-link:hover{color:var(--accent)}
+.terms-agree{font-size:11.5px;color:var(--ink-sub);margin-top:10px;line-height:1.7;text-align:center}
+.tm-back{position:fixed;inset:0;background:rgba(19,19,19,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.tm-back.open{display:flex}
+.tm-box{background:var(--panel);width:100%;max-width:640px;max-height:min(86vh,720px);display:flex;flex-direction:column;border-radius:var(--radius);box-shadow:var(--shadow-md)}
+.tm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 14px 20px;border-bottom:1px solid var(--line)}
+.tm-head h2{font-size:15px;font-weight:500}
+.tm-x{width:36px;height:36px;border:0;background:none;font-size:22px;line-height:1;color:var(--ink-sub);cursor:pointer}
+.tm-x:hover{color:var(--ink)}
+.tm-body{padding:18px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-size:13px;line-height:1.85;color:var(--ink)}
+.tm-body h3{font-size:13px;font-weight:500;margin:18px 0 4px}
+.tm-body h3:first-child{margin-top:0}
+.tm-body p{color:var(--ink-sub);margin-bottom:6px}
+.tm-body ul{margin:4px 0 6px 1.2em;color:var(--ink-sub)}
+.tm-foot{padding:12px 20px;border-top:1px solid var(--line)}
+.tm-foot .btn{margin:0}
 </style>
 </head>
 <body>
@@ -291,6 +312,11 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <span class="upload-sub">JPG / PNG / SVG<br>長辺 1000px 以上・10MB 以下</span>
         <span class="file-name" id="fileName" style="display:none"></span>
       </label>
+      <p class="terms-note">
+        <b>入稿データについて</b>
+        第三者の著作権・商標権・肖像権等を侵害するデータはご利用いただけません。必要な権利・許諾をご確認のうえ入稿してください。
+        <button type="button" class="terms-link" onclick="openTerms()">入稿データ利用規約を見る</button>
+      </p>
     </section>
 
     <section class="s-size">
@@ -417,6 +443,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           このデータを入稿する
         </button>
+        <p class="terms-agree">入稿することで、<button type="button" class="terms-link" onclick="openTerms()">入稿データ利用規約</button>に同意したものとします。</p>
         <p class="form-foot">
           ※ ここでデータを作成したあと、商品ページからご購入ください。お名前とメールアドレスでご注文と照合します。
           ※ 1個ずつデザインを変えたい場合は、データ作成後に表示される「続けて別のデータを作成する」からお送りください。
@@ -1163,6 +1190,85 @@ syncHeaderHeight();
 lockStageHeight(true);
 syncSubmit();
 render();
+</script>
+<!-- 入稿データ利用規約モーダル -->
+<div class="tm-back" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="upload-terms" onclick="if(event.target===this)closeTerms()">
+  <div class="tm-box">
+    <div class="tm-head"><h2 id="upload-terms">入稿データ利用規約</h2><button type="button" class="tm-x" onclick="closeTerms()" aria-label="閉じる">×</button></div>
+    <div class="tm-body">
+      <h3>はじめに</h3>
+      <p>この入稿データ利用規約（以下「本規約」）は、大安工業株式会社（以下「当社」）が提供する彫刻シミュレーター（以下「本サービス」）および、本サービスで作成したデータをもとに当社が製作するオーダーメイド品（以下「本製品」）について、入稿データの取扱いと当社・お客様双方の責任範囲を定めるものです。本サービスでデータを作成・送信された時点で、本規約に同意いただいたものとみなします。</p>
+      <h3>第1条　本サービスの内容</h3>
+      <p>本サービスは、お客様が選んだ画像をプレートに彫刻した場合のイメージを確認し、彫刻用データを作成して当社へ送信するためのものです。本サービスでのデータ作成は、本製品の売買契約そのものではありません。売買契約は、お客様が当社のオンラインショップ（STORES）でご注文され、当社が承諾した時点で成立します。ご注文時には、ショップの表示・規定も併せてご確認ください。</p>
+      <h3>第2条　入稿データに関するお客様の確認事項</h3>
+      <p>お客様は、本サービスに入稿する画像、写真、イラスト、ロゴ、文字、その他のデータ（以下「入稿データ」）について、本サービスによる複製・加工および本製品の製造に必要な権利を有している、または必要な許諾を得ていることを確認のうえ入稿してください。</p>
+      <h3>第3条　入稿できないデータ</h3>
+      <p>以下に該当する、または該当するおそれがあるデータは、製作をお断りする場合があります。</p>
+      <ul>
+        <li>第三者の著作権を侵害するもの</li>
+        <li>第三者の商標権、意匠権その他の知的財産権を侵害するもの</li>
+        <li>第三者の肖像権、パブリシティ権、プライバシー等を侵害するもの</li>
+        <li>権利者の許諾なく使用されたキャラクター、ロゴ、写真等</li>
+        <li>他人の個人情報を、本人の同意なく含むもの</li>
+        <li>法令または公序良俗に反するもの（わいせつ、暴力的、差別的な表現を含む）</li>
+        <li>偽造・模倣品の製造につながるもの</li>
+        <li>その他、当社が製作することが適切でないと判断したもの</li>
+      </ul>
+      <h3>第4条　二次創作等について</h3>
+      <p>既存の漫画、アニメ、ゲーム、映画、キャラクター等をもとに制作された二次創作についても、権利者が定めるガイドラインや利用条件等をご確認ください。二次創作であることのみを理由として、自由な商品化や複製が認められるものではありません。必要な許諾は、入稿されるお客様自身でご確認ください。</p>
+      <p>また、インターネット上で見つけた画像やAIで生成した画像は、利用条件や権利関係が不明確な場合があります。お客様の責任でご確認ください。</p>
+      <h3>第5条　当社による確認・お断り・修正依頼</h3>
+      <p>当社は、入稿されたすべてのデータについて、著作権その他の権利関係を個別に調査・確認するものではありません。</p>
+      <p>ただし、第三者の権利を侵害するおそれがある、または本規約に適合しないと当社が判断した場合は、製作開始前またはご注文後であっても、データの変更・権利関係の確認・再入稿をお願いすることがあります。また、当社の判断により製作をお断りすることがあります。</p>
+      <p>製作上の理由（解像度不足、線が細すぎる、彫刻に適さない等）によるデータの調整・再入稿のお願いについても同様です。</p>
+      <h3>第6条　適法性の非保証</h3>
+      <p>当社が入稿データを受け付けたこと、または製作可能と判断して製作したことは、当該データの利用が第三者の権利を侵害しないこと、および法令に適合することを、当社が保証するものではありません。</p>
+      <h3>第7条　当社による入稿データの利用</h3>
+      <p>お客様は、当社が本製品の製作、お客様との連絡、確認および品質管理のために必要な範囲で、入稿データを複製・加工・保管することを許諾するものとします。</p>
+      <p>当社は、入稿データをお客様の同意なく、広告・実績紹介・SNS等で公開しません。また、入稿データに関する権利はお客様または権利者に帰属し、本規約により当社へ移転するものではありません。</p>
+      <h3>第8条　データ・個人情報の取扱い</h3>
+      <p>本サービスでお預かりする入稿データ、お名前、メールアドレス、備考欄の内容は、本製品の製作、ご注文との照合、確認メールの送信、お問い合わせ対応のためにのみ利用します。</p>
+      <p>これらの情報は、法令に基づく場合を除き、お客様の同意なく第三者へ提供しません。製作および対応に必要な期間保管し、不要となったときは適切に削除します。</p>
+      <p>入稿データの削除をご希望の場合は、確認メールへのご返信などでご連絡ください。ただし、ご注文の製作中・発送前のデータは、削除によりお届けできなくなることがあります。</p>
+      <h3>第9条　仕上がりについて</h3>
+      <p>本サービスのプレビューは、実際の彫刻のイメージを確認していただくための目安です。実物は、製品の素材・表面仕上げ、彫刻方法、画像の細かさ等により、色味・濃淡・線の太さ・細部の再現が異なる場合があります。</p>
+      <p>非常に細い線や小さな文字、細かいグラデーション等は、彫刻で再現できない場合があります。この場合、当社が仕上がりを優先してデータを調整する、またはご相談させていただくことがあります。</p>
+      <h3>第10条　注文後に製作できないと判断した場合</h3>
+      <p>ご注文後に、入稿データの権利関係等を理由として製作できないと当社が判断した場合は、お客様へご連絡し、別データへの変更・再入稿・注文キャンセル等についてご案内します。返金が必要となる場合は、当ショップの注文・キャンセルに関する規定に基づき対応します。</p>
+      <h3>第11条　オーダーメイド品の返品・交換</h3>
+      <p>本製品は、お客様のデータに基づいて製作するオーダーメイド品です。お客様の都合による返品・交換・キャンセルは、製作開始後はお受けできません。</p>
+      <p>ただし、当社の製作上の不備（入稿データと著しく異なる、破損等）があった場合は、お届け後速やかにご連絡ください。再製作または返金等で対応します。入稿データそのものに起因する仕上がりの差（第9条）は、不備には当たりません。</p>
+      <h3>第12条　権利侵害等の申し立てへの対応</h3>
+      <p>入稿データについて第三者から権利侵害等の申し立てがあった場合、当社は必要に応じて、製作・発送・注文処理を停止することがあります。</p>
+      <p>お客様の入稿データに起因して第三者との間で問題が生じた場合、お客様の責任と費用で解決していただくことがあります。当社が損害を受けた場合は、その賠償をお願いすることがあります。</p>
+      <h3>第13条　禁止事項</h3>
+      <p>本サービスの利用にあたり、次の行為を禁止します。</p>
+      <ul>
+        <li>不正なアクセスや、本サービスの動作を妨げる行為</li>
+        <li>大量の無意味なデータの送信</li>
+        <li>他人になりすました入力、虚偽の連絡先の入力</li>
+        <li>本サービスの画面・プログラムの無断複製・転載・再配布</li>
+      </ul>
+      <h3>第14条　責任の範囲</h3>
+      <p>当社は、本規約に定める場合を除き、入稿データの内容に起因して生じた損害について責任を負いません。ただし、当社に故意または重大な過失がある場合など、法令上当社が負うべき責任を免除するものではありません。</p>
+      <p>本サービスの停止・不具合により生じた損害についても、当社に故意または重大な過失がある場合を除き、責任を負いません。</p>
+      <h3>第15条　規約の変更</h3>
+      <p>当社は、必要に応じて本規約を変更することがあります。変更後の規約は、本サービス上に表示した時点から適用されます。ご注文済みのデータには、入稿時点の規約を適用します。</p>
+      <h3>第16条　準拠法・管轄</h3>
+      <p>本規約は日本法に準拠します。本サービスに関して紛争が生じた場合は、当社の所在地を管轄する裁判所を第一審の管轄裁判所とします（法令により別の裁判所が管轄となる場合を除きます）。</p>
+      <p style="margin-top:14px;font-size:12px;color:var(--ink-mute)">制定：2026年10月7日　大安工業株式会社</p>
+    </div>
+    <div class="tm-foot"><button type="button" class="btn btn-secondary" onclick="closeTerms()">閉じる</button></div>
+  </div>
+</div>
+<script>
+/* 入稿データ利用規約モーダル（既存処理には触れない独立ブロック） */
+function openTerms(){var m=document.getElementById('termsModal');m.classList.add('open');document.body.style.overflow='hidden';m.querySelector('.tm-body').scrollTop=0;
+  if(location.hash!=='#upload-terms'){try{history.replaceState(null,'','#upload-terms')}catch(e){}}}
+function closeTerms(){document.getElementById('termsModal').classList.remove('open');document.body.style.overflow='';
+  if(location.hash==='#upload-terms'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeTerms()});
+window.addEventListener('load',function(){if(location.hash==='#upload-terms')openTerms()});
 </script>
 </body>
 </html>
