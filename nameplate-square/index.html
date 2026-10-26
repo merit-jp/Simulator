@@ -472,7 +472,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 
         <!-- 注釈（枠内・左下） -->
         <p class="ov-note" id="legendFinish">ヘアライン仕上げステンレスに黒く彫刻したイメージです。</p>
-        <p class="ov-note" id="legendMock" style="display:none">外壁に取り付けたイメージです。壁の色や光の当たり方で見え方は変わります。</p>
+        <p class="ov-note" id="legendMock" style="display:none">コンクリートの外壁に取り付けたイメージです。壁の色や光の当たり方で見え方は変わります。</p>
       </div>
     </section>
 
@@ -941,18 +941,25 @@ function blurredFill(x, cw, blur, color, drawShape){
   x.restore();
 }
 
-/* 外壁（塗り壁）のテクスチャ */
+/* 外壁（コンクリート打ちっぱなし）のテクスチャ
+   ・灰色の地に、型枠由来のゆるいムラ・細かい気泡（ピンホール）・雨だれの縦筋
+   ・型枠パネルの継ぎ目（横1本）
+   位置はすべて壁の中心を原点にしたmm。 */
+const CONCRETE_JOINT = 150;                                        // 横の継ぎ目の位置(mm)
 let wallCache = null;
 function wallTexture(cw, ch, ppm){
   if(wallCache && wallCache.w === cw) return wallCache.cv;
-  const rnd = seeded(20261025);
+  const rnd = seeded(20261026);
   const cv = document.createElement("canvas");
   cv.width = cw; cv.height = ch;
   const x = cv.getContext("2d");
-  x.fillStyle = "#d6cec2"; x.fillRect(0, 0, cw, ch);
+  const cx = cw/2, cy = ch/2;
 
-  // 左官仕上げのゆるいムラ：小さな乱数画像を引き伸ばしてなめらかなムラにする（2段階の粗さ）
-  [[14, 0.14], [48, 0.10]].forEach(([n, a])=>{
+  // 地の色（やや青みのあるグレー）
+  x.fillStyle = "#a7a8a6"; x.fillRect(0, 0, cw, ch);
+
+  // 型枠由来のムラ：小さな乱数画像を引き伸ばしてなめらかなムラにする（3段階の粗さ）
+  [[6, 0.22], [18, 0.16], [60, 0.12]].forEach(([n, a])=>{
     const sm = document.createElement("canvas");
     sm.width = n; sm.height = n;
     const sx = sm.getContext("2d"), sd = sx.createImageData(n, n);
@@ -968,13 +975,37 @@ function wallTexture(cw, ch, ppm){
     x.drawImage(sm, 0, 0, cw, ch);
     x.restore();
   });
-  // 細かい砂粒
+
+  // 雨だれの縦筋（上から下へうっすら）
+  for(let i = 0; i < 18; i++){
+    const sx0 = rnd()*cw, w = (2 + rnd()*10)*ppm, len = ch*(0.25 + rnd()*0.6), y0 = rnd()*ch*0.4;
+    const g = x.createLinearGradient(0, y0, 0, y0 + len);
+    const a = 0.03 + rnd()*0.05;
+    g.addColorStop(0, `rgba(60,62,64,${a.toFixed(3)})`); g.addColorStop(1, "rgba(60,62,64,0)");
+    x.fillStyle = g; x.fillRect(sx0, y0, w, len);
+  }
+
+  // 細かい気泡（ピンホール）と砂粒
   const d = x.getImageData(0, 0, cw, ch), px = d.data;
   for(let i = 0; i < px.length; i += 4){
-    const n = (rnd() - 0.5) * 16 + (rnd() < 0.015 ? -22 : 0);
-    px[i] += n; px[i+1] += n; px[i+2] += n * 0.95;
+    const n = (rnd() - 0.5) * 14;
+    px[i] += n; px[i+1] += n; px[i+2] += n;
   }
   x.putImageData(d, 0, 0);
+  for(let i = 0; i < 300; i++){
+    const r = (0.3 + rnd()*rnd()*1.6)*ppm;
+    const hx = rnd()*cw, hy = rnd()*ch;
+    x.fillStyle = `rgba(55,56,58,${(0.35 + rnd()*0.35).toFixed(3)})`;
+    x.beginPath(); x.arc(hx, hy, r, 0, Math.PI*2); x.fill();
+    x.fillStyle = "rgba(255,255,255,.18)";           // 穴の下ふちに光が当たる
+    x.beginPath(); x.arc(hx + r*0.3, hy + r*0.4, r*0.6, 0, Math.PI); x.fill();
+  }
+
+  // 型枠パネルの継ぎ目（横）：細い溝＋下側の明るいふち
+  const jy = cy + CONCRETE_JOINT*ppm;
+  x.fillStyle = "rgba(60,61,63,.45)"; x.fillRect(0, jy - 0.6*ppm, cw, 1.2*ppm);
+  x.fillStyle = "rgba(255,255,255,.22)"; x.fillRect(0, jy + 0.6*ppm, cw, 0.6*ppm);
+
   wallCache = { w:cw, cv };
   return cv;
 }
@@ -1024,7 +1055,7 @@ function leafTexture(cw, ch, ppm){
       const ang = rnd() * Math.PI;
       const blur = (3.5 + rnd()*6) * ppm;
       const a = 0.16 + rnd()*0.16;
-      blurredFill(x, cw, blur, `rgba(92,82,64,${a.toFixed(3)})`, ()=>{
+      blurredFill(x, cw, blur, `rgba(62,62,62,${a.toFixed(3)})`, ()=>{
         x.beginPath(); x.ellipse(bx, by, len/2, wid/2, ang, 0, Math.PI*2); x.fill();
       });
     }
@@ -1053,13 +1084,13 @@ function drawMockup(c, ppm, cw, ch){
 
   // 2. 落ち影（板厚2mm＋両面テープの浮き分。光は左上から）
   c.save();
-  c.shadowColor = "rgba(48,38,26,.38)";
+  c.shadowColor = "rgba(26,27,29,.42)";
   c.shadowBlur = 4.5*ppm;
   c.shadowOffsetX = 2.6*ppm*MOCK_LIGHT.dx; c.shadowOffsetY = 2.6*ppm*MOCK_LIGHT.dy;
   platePath(c, cx, cy, ppm); c.fillStyle = "#8a8278"; c.fill();
   c.restore();
   c.save();
-  c.shadowColor = "rgba(30,24,16,.40)";
+  c.shadowColor = "rgba(18,19,21,.45)";
   c.shadowBlur = 1.0*ppm;
   c.shadowOffsetX = 0.8*ppm*MOCK_LIGHT.dx; c.shadowOffsetY = 0.8*ppm*MOCK_LIGHT.dy;
   platePath(c, cx, cy, ppm); c.fillStyle = "#8a8278"; c.fill();
