@@ -589,10 +589,11 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzujXjyTnYw50Ig95L9YZsf4NlzqKqw7sJdoBIAlyHUSWJ3WWZRN_my6bOCSuQ6t4S-/exec";
 
 /* ★公開前に設定する：STORESの商品ページURL（サイズごとに商品が分かれる想定） */
+/* スクエアは1つの商品ページの中でサイズを選ぶ形のため、3サイズとも同じURL */
 const STORE_URLS = {
-  100: "",   // スクエア S 100×100
-  120: "",   // スクエア M 120×120
-  150: ""    // スクエア L 150×150
+  100: "https://dyk.stores.jp/items/6ade9449e9e8a13d50275988",   // スクエア S 100×100
+  120: "https://dyk.stores.jp/items/6ade9449e9e8a13d50275988",   // スクエア M 120×120
+  150: "https://dyk.stores.jp/items/6ade9449e9e8a13d50275988"    // スクエア L 150×150
 };
 const STORE_HOME_URL = "https://dyk.stores.jp/";  // ショップTOP（フォールバック用）
 
