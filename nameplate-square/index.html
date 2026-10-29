@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#00AC97">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@600&family=Zen+Maru+Gothic:wght@500&family=Yuji+Mai&family=Libre+Baskerville&family=Montserrat:wght@500&family=Bebas+Neue&family=Parisienne&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@600&family=Zen+Maru+Gothic:wght@500&family=Yuji+Mai&family=Libre+Baskerville&family=Montserrat:wght@500&family=Bebas+Neue&family=Klee+One:wght@600&family=Kaisei+Decol:wght@500&family=Abril+Fatface&family=Nunito:wght@600&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -352,7 +352,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 
 .sq-icon{display:block;border-radius:1.5px;background:linear-gradient(135deg,#e6e8ea 0%,#b9bdc1 100%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 @media(max-width:900px){
-  .s-text{order:3} .s-font{order:4} .s-size{order:5}
+  .s-size{order:3} .s-text{order:4} .s-font{order:5}
 }
 
 /* 筆文字：Google Fonts以外の毛筆フォントを使う場合は、fonts/fude.woff2（または fude.ttf）を置くと自動で使われる。
@@ -398,8 +398,17 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
       </div>
     </section>
 
+    <section class="s-size">
+      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">文字の大きさ</h2></div>
+      <div class="slider-row">
+        <input type="range" id="sizeSlider" min="60" max="100" value="85" oninput="updateScale(this.value)">
+        <span class="slider-val" id="sizeVal">85%</span>
+      </div>
+      <div class="scale-ends"><span>余白を広く</span><span>いっぱいに</span></div>
+    </section>
+
     <section class="s-text">
-      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">文字を入れる</h2></div>
+      <div class="sec-head"><span class="sec-num">STEP 03</span><h2 class="sec-title">文字を入れる</h2></div>
       <div class="txt-fields">
         <label class="fld"><span>お名前（漢字・かな）<span class="count" id="cntJa">0/8</span></span>
           <input type="text" id="tJa" maxlength="8" placeholder="例）山田" autocomplete="off" oninput="onTextInput()">
@@ -433,21 +442,14 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     </section>
 
     <section class="s-font">
-      <div class="sec-head"><span class="sec-num">STEP 03</span><h2 class="sec-title">書体を選ぶ</h2></div>
+      <div class="sec-head"><span class="sec-num">STEP 04</span><h2 class="sec-title">書体を選ぶ</h2></div>
       <span class="font-group-lbl">お名前（漢字・かな）</span>
       <div class="font-list" id="jaFontList"></div>
       <span class="font-group-lbl second">ローマ字・番地</span>
       <div class="font-list" id="enFontList"></div>
     </section>
 
-    <section class="s-size">
-      <div class="sec-head"><span class="sec-num">STEP 04</span><h2 class="sec-title">文字の大きさ</h2></div>
-      <div class="slider-row">
-        <input type="range" id="sizeSlider" min="60" max="100" value="85" oninput="updateScale(this.value)">
-        <span class="slider-val" id="sizeVal">85%</span>
-      </div>
-      <div class="scale-ends"><span>余白を広く</span><span>いっぱいに</span></div>
-    </section>
+
 
 
   </div>
@@ -608,16 +610,20 @@ const EXPORT_PPM = 20;     // 書き出しの解像度(px/mm)。約508dpi
 /* 書体。いずれも SIL Open Font License（商用・彫刻品の販売に利用可）。
    weight は彫刻でつぶれない太さを優先して選んでいる（試作で要確認） */
 const JA_FONTS = [
-  { key:"gothic", label:"ゴシック",   family:"Noto Sans JP",     weight:600 },
+  { key:"gothic", label:"ゴシック",   family:"Noto Sans JP",     weight:500 },  // Medium
   { key:"mincho", label:"明朝",       family:"Shippori Mincho",  weight:600 },
   { key:"maru",   label:"丸ゴシック", family:"Zen Maru Gothic",  weight:500 },
-  { key:"fude",   label:"筆文字",     family:"DYK Fude", css:'"DYK Fude", "Yuji Mai"', weight:400 }
+  { key:"fude",   label:"筆文字",     family:"DYK Fude", css:'"DYK Fude", "Yuji Mai"', weight:400 },
+  { key:"decol",  label:"デザイン",   family:"Kaisei Decol",     weight:500 },
+  { key:"kyoka",  label:"教科書体",   family:"Klee One",         weight:600 }
 ];
 const EN_FONTS = [
   { key:"serif",  label:"セリフ",     family:"Libre Baskerville",  weight:400 },  // 数字の高さがそろう書体（番地がガタつかない）
   { key:"sans",   label:"サンセリフ", family:"Montserrat",         weight:500 },
   { key:"cond",   label:"コンデンス", family:"Bebas Neue",         weight:400 },
-  { key:"script", label:"筆記体",     family:"Parisienne",         weight:400 }
+  { key:"fat",    label:"ファット",   family:"Abril Fatface",      weight:400 },
+  { key:"round",  label:"ラウンド",   family:"Nunito",             weight:600 },
+  { key:"script", label:"筆記体",     family:"Pinyon Script",      weight:400, script:true }
 ];
 const SAMPLE = { ja:"山田", en:"YAMADA", no:"" };
 /* ================================================================ */
@@ -708,8 +714,19 @@ function drawTracked(c, text, f, sizePx, track, cx, baseY){
   chars.forEach((ch,i)=>{ c.fillText(ch, x, baseY); x += widths[i] + track*sizePx; });
 }
 
+/* 見た目の大きさをそろえる補正。
+   筆記体などは小文字（x の高さ）がとても小さく作られているため、同じ文字サイズでも
+   小さく見える。小文字を含むときは、x の高さが標準（0.52em）に近づくよう拡大する（最大1.5倍）。
+   大文字だけのときは各書体の大文字の高さがほぼそろっているので補正しない。 */
+function optScale(f, text){
+  if(!/[a-z]/.test(text)) return 1;
+  mctx.font = fontStr(f, REF);
+  const xh = (mctx.measureText("x").actualBoundingBoxAscent || REF*0.52) / REF;
+  return Math.min(1.5, Math.max(1, 0.52 / xh));
+}
+
 function jaTrack(n){ return n <= 2 ? 0.25 : n <= 4 ? 0.12 : 0.04; }
-function enTrack(){ return enFont.key === "script" ? 0 : 0.12; }
+function enTrack(){ return enFont.script ? 0 : 0.12; }   // 筆記体は字間を空けない（文字がつながるため）
 
 /* ---------------- レイアウト ----------------
    入力の組み合わせに合わせて自動で配置を決める。
@@ -728,7 +745,7 @@ function layout(){
     const n = Array.from(t.ja).length, tv = n <= 2 ? 0.2 : n <= 4 ? 0.09 : 0.03;
     const jaLen = n + (n-1)*tv;                           // 文字サイズ1あたりの列の長さ
     const subs = [];
-    if(t.en){ const tr = enTrack(); subs.push({ kind:"en", text:t.en, f:enFont, rel:0.3, track:tr, m:measure(t.en, enFont, tr) }); }
+    if(t.en){ const tr = enTrack(); subs.push({ kind:"en", text:t.en, f:enFont, rel:0.3*optScale(enFont, t.en), track:tr, m:measure(t.en, enFont, tr) }); }
     if(t.no){ subs.push({ kind:"no", text:t.no, f:enFont, rel:0.2, track:0.08, m:measure(t.no, enFont, 0.08) }); }
     subs.forEach(l=>{ l.h = l.m.asc + l.m.desc; });
     const gapJa = 0.36, gapSub = (cur) => 0.7*cur.rel;
@@ -746,7 +763,7 @@ function layout(){
   if(t.ja){ const tr = jaTrack(Array.from(t.ja).length);
     lines.push({ kind:"ja", text:t.ja, f:jaFont, rel:1, track:tr, m:measure(t.ja, jaFont, tr) }); }
   if(t.en){ const tr = enTrack();
-    lines.push({ kind:"en", text:t.en, f:enFont, rel:t.ja?0.3:1, track:tr, m:measure(t.en, enFont, tr) }); }
+    lines.push({ kind:"en", text:t.en, f:enFont, rel:(t.ja?0.3:1)*optScale(enFont, t.en), track:tr, m:measure(t.en, enFont, tr) }); }
   if(t.no){ lines.push({ kind:"no", text:t.no, f:enFont, rel:t.ja?0.2:0.42, track:0.08, m:measure(t.no, enFont, 0.08) }); }
 
   // お名前（漢字）は字面ではなく1文字の枠（em）で高さを取る。
