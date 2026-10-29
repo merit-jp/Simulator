@@ -589,10 +589,11 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbxXRs0yALUbU6L1DFKGpfLgSOLtqO0LlcMCyIyBEdSQuVwMITHvsOSSSC3I6-C16Ug/exec";   // 横長表札用
 
 /* ★公開前に設定する：STORESの商品ページURL（サイズごとに商品が分かれる想定） */
+/* 横長は1つの商品ページの中でサイズを選ぶ形のため、3サイズとも同じURL */
 const STORE_URLS = {
-  "150x60":  "",   // 横長 S 150×60
-  "200x80":  "",   // 横長 M 200×80
-  "250x100": ""    // 横長 L 250×100
+  "150x60":  "https://dyk.stores.jp/items/6ae2eb43ad91407abebb869c",   // 横長 S 150×60
+  "200x80":  "https://dyk.stores.jp/items/6ae2eb43ad91407abebb869c",   // 横長 M 200×80
+  "250x100": "https://dyk.stores.jp/items/6ae2eb43ad91407abebb869c"    // 横長 L 250×100
 };
 const STORE_HOME_URL = "https://dyk.stores.jp/";  // ショップTOP（フォールバック用）
 
