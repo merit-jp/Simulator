@@ -406,7 +406,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     </section>
 
     <section class="s-date">
-      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">お届け日（誕生日）を選ぶ</h2></div>
+      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">誕生日を選ぶ</h2></div>
       <div class="date-row">
         <label class="fld"><span>年</span>
           <select id="dY" onchange="onTextInput()"></select>
@@ -418,7 +418,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <select id="dD" onchange="onTextInput()"></select>
         </label>
       </div>
-      <p class="txt-hint hint-under">お誕生日など、お届けしたい日付を選んでください。この日付をジョッキに彫刻し、この日に届くように発送します。製作に7営業日（土日祝を除く）かかるため、ご注文から7営業日以上先の日付をお選びください。</p>
+      <p class="txt-hint hint-under">選んだ日付をジョッキに彫刻し、基本的にこの日に届くよう発送します。誕生日当日を避けたい場合は、入稿フォームの備考欄にお届け希望日をご記入ください。製作に7営業日（土日祝を除く）かかるため、ご注文から7営業日以上先の日付をお選びください。</p>
       <div class="notice notice-warn" id="dateWarn" style="display:none;margin-top:10px"></div>
     </section>
 
@@ -485,18 +485,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email">
             <div class="field-err" id="errMail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13" stroke-linecap="round"/><line x1="12" y1="16.5" x2="12" y2="16.5" stroke-linecap="round"/></svg><span>メールアドレスを入力してください</span></div>
           </label>
-          <label class="fld full"><span>配達の希望時間帯</span>
-            <select id="fTime" class="sel-full">
-              <option value="指定なし">指定なし</option>
-              <option value="午前中">午前中</option>
-              <option value="14〜16時">14〜16時</option>
-              <option value="16〜18時">16〜18時</option>
-              <option value="18〜20時">18〜20時</option>
-              <option value="19〜21時">19〜21時</option>
-            </select>
-            <p class="txt-hint hint-under">お届け日の、この時間帯に届くよう手配します。配送状況により、ご希望に添えない場合があります。</p>
-          </label>
-          <label class="fld full"><span>備考</span><textarea id="fNote" rows="3" placeholder="例）プレゼント用です"></textarea></label>
+          <label class="fld full"><span>備考</span><textarea id="fNote" rows="3" placeholder="例）誕生日当日は不在のため、前日の着でお願いします"></textarea></label>
         </div>
 
         <label class="fld full">
@@ -521,7 +510,8 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <p class="terms-agree">入稿することで、<button type="button" class="terms-link" onclick="openTerms()">入稿データ利用規約</button>に同意したものとします。</p>
         <p class="form-foot">
           ※ ここでデータを作成したあと、商品ページからご購入ください。お名前とメールアドレスでご注文と照合します。
-          ※ お届け日に間に合うよう、データの作成後はお早めにご購入ください。ご購入の確認後に製作を始めます。
+          ※ 誕生日以外の日にお届けを希望される場合は、備考欄にお届け希望日をご記入ください。
+          ※ お届けに間に合うよう、データの作成後はお早めにご購入ください。ご購入の確認後に製作を始めます。
           ※ データの内容に誤りがあった場合は、お送りする確認メールにご返信ください。ご購入前・発送前であれば修正を承ります。
         </p>
       </div>
@@ -988,7 +978,7 @@ function syncDateWarn(){
   const info = deliveryInfo();
   if(info && info.short){
     dateWarn.style.display = "";
-    dateWarn.textContent = "選んだ日付までの営業日が" + LEAD_BIZ_DAYS + "日より少ないため、お届けがこの日付より遅れる場合があります。" +
+    dateWarn.textContent = "選んだ誕生日までの営業日が" + LEAD_BIZ_DAYS + "日より少ないため、お届けがこの日付より遅れる場合があります。" +
       "できる限り間に合うよう製作いたしますが、あらかじめご了承ください。";
   }else{
     dateWarn.style.display = "none";
@@ -1111,7 +1101,6 @@ async function submitOrder(){
     plateKey: "jug350",
     textName: t.name,
     date: (t.y && t.m && t.d) ? (t.y + "/" + pad2(t.m) + "/" + pad2(t.d)) : "",
-    deliveryTime: fTime.value,
     bizDays: dInfo.biz,
     shortNotice: dInfo.short ? "要注意（" + LEAD_BIZ_DAYS + "営業日未満）" : "",
     dateText: t.date,
@@ -1171,7 +1160,7 @@ function showDone(name, qty){
 function nextItem(){
   donePanel.style.display = "none";
   formPanel.style.display = "block";
-  tName.value = ""; dY.value = ""; dM.value = ""; dD.value = ""; fTime.value = "指定なし";
+  tName.value = ""; dY.value = ""; dM.value = ""; dD.value = "";
   fNote.value = "";
   document.getElementById("fQty").value = 1;
   onTextInput();
