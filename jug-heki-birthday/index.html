@@ -366,6 +366,9 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
 .ov-note{color:rgba(20,20,20,.45);white-space:normal;line-height:1.6}   /* 他のシミュレーターと同じく舞台の左下。白い舞台なので文字は濃いめ */
 .date-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
 .date-row label.fld{margin-bottom:0}
+.sel-full{width:100%;padding:10px 10px;font:inherit;font-size:14px;color:var(--ink);
+  border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel);appearance:auto}
+.sel-full:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
 .hint-under{margin-top:8px}
 .date-row select{width:100%;padding:10px 10px;font:inherit;font-size:14px;color:var(--ink);
   border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel);appearance:auto}
@@ -403,7 +406,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
     </section>
 
     <section class="s-date">
-      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">日付を入れる</h2></div>
+      <div class="sec-head"><span class="sec-num">STEP 02</span><h2 class="sec-title">お届け日（誕生日）を選ぶ</h2></div>
       <div class="date-row">
         <label class="fld"><span>年</span>
           <select id="dY" onchange="onTextInput()"></select>
@@ -415,7 +418,8 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <select id="dD" onchange="onTextInput()"></select>
         </label>
       </div>
-      <span class="txt-hint hint-under">お誕生日など、贈る日付を選んでください。入れない場合は空欄のままで大丈夫です。</span>
+      <p class="txt-hint hint-under">お誕生日など、お届けしたい日付を選んでください。この日付をジョッキに彫刻し、この日に届くように発送します。製作に7営業日（土日祝を除く）かかるため、ご注文から7営業日以上先の日付をお選びください。</p>
+      <div class="notice notice-warn" id="dateWarn" style="display:none;margin-top:10px"></div>
     </section>
 
     <section class="s-font">
@@ -481,6 +485,17 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
           <label class="fld"><span>メールアドレス <em class="req">*</em></span><input type="email" id="fMail" placeholder="example@mail.com" autocomplete="email">
             <div class="field-err" id="errMail"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="7.5" x2="12" y2="13" stroke-linecap="round"/><line x1="12" y1="16.5" x2="12" y2="16.5" stroke-linecap="round"/></svg><span>メールアドレスを入力してください</span></div>
           </label>
+          <label class="fld full"><span>配達の希望時間帯</span>
+            <select id="fTime" class="sel-full">
+              <option value="指定なし">指定なし</option>
+              <option value="午前中">午前中</option>
+              <option value="14〜16時">14〜16時</option>
+              <option value="16〜18時">16〜18時</option>
+              <option value="18〜20時">18〜20時</option>
+              <option value="19〜21時">19〜21時</option>
+            </select>
+            <p class="txt-hint hint-under">お届け日の、この時間帯に届くよう手配します。配送状況により、ご希望に添えない場合があります。</p>
+          </label>
           <label class="fld full"><span>備考</span><textarea id="fNote" rows="3" placeholder="例）プレゼント用です"></textarea></label>
         </div>
 
@@ -506,6 +521,7 @@ textarea{resize:vertical;min-height:104px;line-height:1.75}
         <p class="terms-agree">入稿することで、<button type="button" class="terms-link" onclick="openTerms()">入稿データ利用規約</button>に同意したものとします。</p>
         <p class="form-foot">
           ※ ここでデータを作成したあと、商品ページからご購入ください。お名前とメールアドレスでご注文と照合します。
+          ※ お届け日に間に合うよう、データの作成後はお早めにご購入ください。ご購入の確認後に製作を始めます。
           ※ データの内容に誤りがあった場合は、お送りする確認メールにご返信ください。ご購入前・発送前であれば修正を承ります。
         </p>
       </div>
@@ -926,20 +942,57 @@ function updateSpec(){
 }
 
 /* ---------------- 操作 ---------------- */
+/* お届け日は「明日以降」だけ選べる（過去の日付・今日は出さない）。年は今年から2年先まで */
+const LEAD_BIZ_DAYS = 7;   // 製作・発送に必要な営業日数
+function today0(){ const t = new Date(); t.setHours(0,0,0,0); return t; }
 function buildDateSelects(){
   const now = new Date().getFullYear();
   dY.innerHTML = '<option value="">----</option>' +
-    Array.from({length: 5}, (_,i)=>now - 1 + i).map(y=>`<option value="${y}">${y}</option>`).join("");
-  dM.innerHTML = '<option value="">--</option>' +
-    Array.from({length:12}, (_,i)=>i+1).map(m=>`<option value="${m}">${m}</option>`).join("");
+    [now, now+1, now+2].map(y=>`<option value="${y}">${y}</option>`).join("");
   syncDays();
 }
 function syncDays(){
-  const y = +dY.value || 2000, m = +dM.value || 1;
-  const n = new Date(y, m, 0).getDate();
-  const cur = +dD.value || 0;
+  const t = today0(), first = new Date(t.getTime() + 864e5);   // 明日
+  const y = +dY.value || 0;
+  // 月：今年なら明日の月から
+  const curM = +dM.value || 0;
+  const m0 = (y === first.getFullYear()) ? first.getMonth()+1 : 1;
+  dM.innerHTML = '<option value="">--</option>' +
+    Array.from({length:12}, (_,i)=>i+1).filter(m=>!y || m >= m0)
+      .map(m=>`<option value="${m}"${m===curM?" selected":""}>${m}</option>`).join("");
+  const m = +dM.value || 0;
+  // 日：明日より前は出さない
+  const n = new Date(y || 2000, m || 1, 0).getDate();
+  const curD = +dD.value || 0;
+  const d0 = (y === first.getFullYear() && m === first.getMonth()+1) ? first.getDate() : 1;
   dD.innerHTML = '<option value="">--</option>' +
-    Array.from({length:n}, (_,i)=>i+1).map(d=>`<option value="${d}"${d===cur?" selected":""}>${d}</option>`).join("");
+    Array.from({length:n}, (_,i)=>i+1).filter(d=>!(y && m) || d >= d0)
+      .map(d=>`<option value="${d}"${d===curD?" selected":""}>${d}</option>`).join("");
+  syncDateWarn();
+}
+/* 今日の翌日から、お届け日の前日までにある営業日（土日を除く）の数。
+   ★祝日・年末年始は数えていない（その分は実際より多く数える） */
+function bizDaysUntil(y, m, d){
+  const target = new Date(y, m-1, d);
+  let n = 0, cur = new Date(today0().getTime() + 864e5);
+  while(cur < target){ const w = cur.getDay(); if(w !== 0 && w !== 6) n++; cur = new Date(cur.getTime() + 864e5); }
+  return n;
+}
+function deliveryInfo(){
+  const y = +dY.value || 0, m = +dM.value || 0, d = +dD.value || 0;
+  if(!(y && m && d)) return null;
+  const biz = bizDaysUntil(y, m, d);
+  return { y, m, d, biz, short: biz < LEAD_BIZ_DAYS };
+}
+function syncDateWarn(){
+  const info = deliveryInfo();
+  if(info && info.short){
+    dateWarn.style.display = "";
+    dateWarn.textContent = "選んだ日付までの営業日が" + LEAD_BIZ_DAYS + "日より少ないため、お届けがこの日付より遅れる場合があります。" +
+      "できる限り間に合うよう製作いたしますが、あらかじめご了承ください。";
+  }else{
+    dateWarn.style.display = "none";
+  }
 }
 
 function buildFontButtons(){
@@ -984,7 +1037,7 @@ function onTextInput(){
 }
 
 function syncSubmit(){
-  submitBtn.disabled = !tName.value.trim();
+  submitBtn.disabled = !(tName.value.trim() && deliveryInfo());   // お名前とお届け日は必須
 }
 function stepQty(d){
   const el = document.getElementById("fQty");
@@ -1025,6 +1078,8 @@ function submitLabel(){
 async function submitOrder(){
   const t = texts();
   if(t.sample) return;
+  const dInfo = deliveryInfo();
+  if(!dInfo) return;
   const name = fName.value.trim(), mail = fMail.value.trim(), note = fNote.value.trim();
   const qty = Math.min(99, Math.max(1, parseInt(document.getElementById("fQty").value,10) || 1));
   noticeErr.style.display = "none";
@@ -1056,6 +1111,9 @@ async function submitOrder(){
     plateKey: "jug350",
     textName: t.name,
     date: (t.y && t.m && t.d) ? (t.y + "/" + pad2(t.m) + "/" + pad2(t.d)) : "",
+    deliveryTime: fTime.value,
+    bizDays: dInfo.biz,
+    shortNotice: dInfo.short ? "要注意（" + LEAD_BIZ_DAYS + "営業日未満）" : "",
     dateText: t.date,
     font: fontSet.label + "（" + nameFace(t.name).family + "）",
     storeUrl: STORE_ITEM_URL || STORE_HOME_URL,
@@ -1113,7 +1171,7 @@ function showDone(name, qty){
 function nextItem(){
   donePanel.style.display = "none";
   formPanel.style.display = "block";
-  tName.value = ""; dY.value = ""; dM.value = ""; dD.value = "";
+  tName.value = ""; dY.value = ""; dM.value = ""; dD.value = ""; fTime.value = "指定なし";
   fNote.value = "";
   document.getElementById("fQty").value = 1;
   onTextInput();
